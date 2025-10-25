@@ -21,7 +21,7 @@ RUN npm run build
 # ============================
 # Etapa 2: Imagen final (producción)
 # ============================
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 
 # Definir directorio de trabajo
 WORKDIR /app
