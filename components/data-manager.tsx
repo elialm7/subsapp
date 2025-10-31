@@ -16,9 +16,11 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useStore } from "@/lib/store"
 import { useToast } from "@/hooks/use-toast"
+import { translations } from "@/lib/translations"
 
 export function DataManager() {
-  const { exportData, importData } = useStore()
+  const { exportData, importData, language } = useStore()
+  const t = translations[language]
   const { toast } = useToast()
   const [importOpen, setImportOpen] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
@@ -38,13 +40,16 @@ export function DataManager() {
       URL.revokeObjectURL(url)
 
       toast({
-        title: "Exportación exitosa",
-        description: "Sus datos han sido descargados correctamente",
+        title: language === "es" ? "Exportación exitosa" : "Export Successful",
+        description:
+          language === "es"
+            ? "Sus datos han sido descargados correctamente"
+            : "Your data has been downloaded successfully",
       })
     } catch (error) {
       toast({
-        title: "Error al exportar",
-        description: "No se pudieron exportar los datos",
+        title: language === "es" ? "Error al exportar" : "Export Error",
+        description: language === "es" ? "No se pudieron exportar los datos" : "Could not export data",
         variant: "destructive",
       })
     }
@@ -64,32 +69,56 @@ export function DataManager() {
 
         // Validate data structure
         if (!data.currencies || !Array.isArray(data.currencies)) {
-          throw new Error("Formato inválido: falta el array de monedas")
+          throw new Error(
+            language === "es"
+              ? "Formato inválido: falta el array de monedas"
+              : "Invalid format: missing currencies array",
+          )
         }
         if (!data.subscriptions || !Array.isArray(data.subscriptions)) {
-          throw new Error("Formato inválido: falta el array de suscripciones")
+          throw new Error(
+            language === "es"
+              ? "Formato inválido: falta el array de suscripciones"
+              : "Invalid format: missing subscriptions array",
+          )
+        }
+
+        if (data.payments && !Array.isArray(data.payments)) {
+          throw new Error(
+            language === "es"
+              ? "Formato inválido: payments debe ser un array"
+              : "Invalid format: payments must be an array",
+          )
         }
 
         // Validate currencies
         for (const currency of data.currencies) {
           if (!currency.id || !currency.code || !currency.name || !currency.symbol) {
-            throw new Error("Formato de moneda inválido")
+            throw new Error(language === "es" ? "Formato de moneda inválido" : "Invalid currency format")
           }
           if (typeof currency.conversionRate !== "number" || currency.conversionRate <= 0) {
-            throw new Error("Tasa de conversión inválida")
+            throw new Error(language === "es" ? "Tasa de conversión inválida" : "Invalid conversion rate")
           }
         }
 
         // Validate subscriptions
         for (const sub of data.subscriptions) {
           if (!sub.id || !sub.name || !sub.currencyId) {
-            throw new Error("Formato de suscripción inválido")
+            throw new Error(language === "es" ? "Formato de suscripción inválido" : "Invalid subscription format")
           }
           if (typeof sub.amount !== "number" || sub.amount < 0) {
-            throw new Error("Monto de suscripción inválido")
+            throw new Error(language === "es" ? "Monto de suscripción inválido" : "Invalid subscription amount")
           }
           if (typeof sub.paymentDay !== "number" || sub.paymentDay < 1 || sub.paymentDay > 31) {
-            throw new Error("Día de pago inválido")
+            throw new Error(language === "es" ? "Día de pago inválido" : "Invalid payment day")
+          }
+        }
+
+        if (data.payments) {
+          for (const payment of data.payments) {
+            if (!payment.id || !payment.subscriptionId || typeof payment.amount !== "number") {
+              throw new Error(language === "es" ? "Formato de pago inválido" : "Invalid payment format")
+            }
           }
         }
 
@@ -97,19 +126,28 @@ export function DataManager() {
         importData(data)
         setImportOpen(false)
         toast({
-          title: "Importación exitosa",
-          description: `${data.currencies.length} monedas y ${data.subscriptions.length} suscripciones importadas`,
+          title: language === "es" ? "Importación exitosa" : "Import Successful",
+          description:
+            language === "es"
+              ? `${data.currencies.length} monedas, ${data.subscriptions.length} suscripciones y ${data.payments?.length || 0} pagos importados`
+              : `${data.currencies.length} currencies, ${data.subscriptions.length} subscriptions and ${data.payments?.length || 0} payments imported`,
         })
 
         // Reset file input
         event.target.value = ""
       } catch (error) {
-        setImportError(error instanceof Error ? error.message : "Error al procesar el archivo")
+        setImportError(
+          error instanceof Error
+            ? error.message
+            : language === "es"
+              ? "Error al procesar el archivo"
+              : "Error processing file",
+        )
       }
     }
 
     reader.onerror = () => {
-      setImportError("Error al leer el archivo")
+      setImportError(language === "es" ? "Error al leer el archivo" : "Error reading file")
     }
 
     reader.readAsText(file)
@@ -119,21 +157,23 @@ export function DataManager() {
     <div className="flex gap-2">
       <Button variant="outline" size="sm" onClick={handleExport} className="gap-2 bg-transparent">
         <Download className="h-4 w-4" />
-        Exportar
+        {t.exportData}
       </Button>
 
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2 bg-transparent">
             <Upload className="h-4 w-4" />
-            Importar
+            {t.importData}
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Importar Datos</DialogTitle>
+            <DialogTitle>{t.importData}</DialogTitle>
             <DialogDescription>
-              Seleccione un archivo JSON con sus datos de respaldo. Esto reemplazará todos los datos actuales.
+              {language === "es"
+                ? "Seleccione un archivo JSON con sus datos de respaldo. Esto reemplazará todos los datos actuales."
+                : "Select a JSON file with your backup data. This will replace all current data."}
             </DialogDescription>
           </DialogHeader>
 
@@ -148,8 +188,12 @@ export function DataManager() {
             <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
               <FileJson className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <label htmlFor="file-upload" className="cursor-pointer">
-                <span className="text-sm font-medium text-foreground">Seleccionar archivo JSON</span>
-                <p className="text-xs text-muted-foreground mt-1">o arrastre y suelte aquí</p>
+                <span className="text-sm font-medium text-foreground">
+                  {language === "es" ? "Seleccionar archivo JSON" : "Select JSON file"}
+                </span>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {language === "es" ? "o arrasque y suelte aquí" : "or drag and drop here"}
+                </p>
               </label>
               <input
                 id="file-upload"
@@ -163,8 +207,10 @@ export function DataManager() {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Advertencia:</strong> La importación reemplazará todas sus monedas y suscripciones actuales.
-                Asegúrese de exportar sus datos actuales antes de importar.
+                <strong>{language === "es" ? "Advertencia:" : "Warning:"}</strong>{" "}
+                {language === "es"
+                  ? " La importación reemplazará todas sus monedas, suscripciones y pagos actuales. Asegúrese de exportar sus datos actuales antes de importar."
+                  : " Import will replace all your current currencies, subscriptions and payments. Make sure to export your current data before importing."}
               </AlertDescription>
             </Alert>
           </div>

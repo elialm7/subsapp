@@ -81,7 +81,7 @@ export function SubscriptionSummary() {
         <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">{t.totalDebt}</p>
+              <p className="text-sm text-muted-foreground">{t.totalDebt || "Deuda Total"}</p>
               <p className="text-3xl font-bold text-foreground">
                 {formatAmount(calculations.totalDebt, selectedCurrencyData)}
               </p>
@@ -96,7 +96,7 @@ export function SubscriptionSummary() {
         <Card className="p-6 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">{t.totalPaid}</p>
+              <p className="text-sm text-muted-foreground">{t.totalPaid || "Total Pagado"}</p>
               <p className="text-3xl font-bold text-foreground">
                 {formatAmount(calculations.totalPaid, selectedCurrencyData)}
               </p>

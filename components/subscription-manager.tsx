@@ -17,10 +17,13 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { useStore } from "@/lib/store"
-import type { Subscription, Currency } from "@/lib/types"
+import type { Subscription } from "@/lib/types"
+import { formatAmount } from "@/lib/utils"
+import { PaymentModal } from "@/components/payment-modal"
 
 export function SubscriptionManager() {
-  const { subscriptions, currencies, addSubscription, updateSubscription, deleteSubscription } = useStore()
+  const { subscriptions, currencies, addSubscription, updateSubscription, deleteSubscription, addPayment, payments } =
+    useStore()
   const [open, setOpen] = useState(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
   const [formData, setFormData] = useState({
@@ -31,6 +34,8 @@ export function SubscriptionManager() {
     hasTax: false,
     taxRate: "0",
   })
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [selectedSubscriptionForPayment, setSelectedSubscriptionForPayment] = useState<Subscription | null>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,6 +93,28 @@ export function SubscriptionManager() {
     }
   }
 
+  const handlePayAll = (subscription: Subscription) => {
+    const currency = getCurrency(subscription.currencyId)
+    const total = calculateTotal(subscription)
+    const existingPayments = payments.filter((p) => p.subscriptionId === subscription.id)
+    const totalPaid = existingPayments.reduce((sum, p) => sum + p.amount, 0)
+    const balance = Math.round((total - totalPaid) * 100) / 100
+
+    // Create payment for the full remaining balance
+    addPayment({
+      id: Date.now().toString(),
+      subscriptionId: subscription.id,
+      amount: balance,
+      date: new Date().toISOString().split("T")[0],
+      type: "full",
+    })
+  }
+
+  const handlePayNow = (subscription: Subscription) => {
+    setSelectedSubscriptionForPayment(subscription)
+    setPaymentModalOpen(true)
+  }
+
   const getCurrency = (currencyId: string) => {
     return currencies.find((c) => c.id === currencyId)
   }
@@ -96,13 +123,6 @@ export function SubscriptionManager() {
     const baseAmount = subscription.amount
     const taxAmount = subscription.hasTax ? baseAmount * (subscription.taxRate / 100) : 0
     return baseAmount + taxAmount
-  }
-
-  const formatAmount = (amount: number, currency: Currency | undefined) => {
-    if (!currency) return amount.toFixed(2)
-    const parts = amount.toFixed(2).split(".")
-    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, currency.thousandSeparator)
-    return `${currency.symbol}${integerPart}${currency.decimalSeparator}${parts[1]}`
   }
 
   return (
@@ -247,6 +267,9 @@ export function SubscriptionManager() {
           {subscriptions.map((subscription) => {
             const currency = getCurrency(subscription.currencyId)
             const total = calculateTotal(subscription)
+            const existingPayments = payments.filter((p) => p.subscriptionId === subscription.id)
+            const totalPaid = existingPayments.reduce((sum, p) => sum + p.amount, 0)
+            const balance = Math.round((total - totalPaid) * 100) / 100
 
             return (
               <div
@@ -291,6 +314,17 @@ export function SubscriptionManager() {
             )
           })}
         </div>
+      )}
+
+      {selectedSubscriptionForPayment && (
+        <PaymentModal
+          isOpen={paymentModalOpen}
+          onClose={() => {
+            setPaymentModalOpen(false)
+            setSelectedSubscriptionForPayment(null)
+          }}
+          subscription={selectedSubscriptionForPayment}
+        />
       )}
     </div>
   )

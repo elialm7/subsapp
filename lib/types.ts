@@ -18,7 +18,17 @@ export interface Subscription {
   taxRate: number // Percentage
 }
 
+export interface Payment {
+  id: string
+  subscriptionId: string
+  amount: number
+  date: string // ISO date format
+  isPartial: boolean
+  remainingBalance: number
+}
+
 export interface AppData {
   currencies: Currency[]
   subscriptions: Subscription[]
+  payments: Payment[]
 }

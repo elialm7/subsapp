@@ -50,6 +50,8 @@ export const translations = {
     breakdownByCurrency: "Breakdown by Currency",
     subtotal: "Subtotal",
     taxes: "Taxes",
+    totalDebt: "Total Debt",
+    totalPaid: "Total Paid",
 
     // Data Manager
     importExport: "Import/Export",
@@ -61,6 +63,26 @@ export const translations = {
 
     // Common
     noData: "No data available",
+
+    dashboard: "Dashboard",
+    payments: "Payments",
+    paymentHistory: "Payment History",
+    totalDebt: "Total Debt",
+    makePayment: "Make Payment",
+    paymentAmount: "Payment Amount",
+    paymentDate: "Payment Date",
+    pay: "Pay",
+    restart: "Restart Cycle",
+    partialPayment: "Partial Payment",
+    fullPayment: "Full Payment",
+    balance: "Balance",
+    paidOn: "Paid on",
+    noPayments: "No payments yet",
+    restartConfirm: "This will reset all subscriptions for a new cycle. Continue?",
+    payNow: "Pay Now",
+    partialPaymentInfo: "Pay partial amount or full balance",
+    allPaid: "All paid ✓",
+    payAll: "Pay All",
   },
   es: {
     // Header
@@ -113,19 +135,38 @@ export const translations = {
     breakdownByCurrency: "Desglose por Moneda",
     subtotal: "Subtotal",
     taxes: "Impuestos",
+    totalDebt: "Total de Deuda",
+    totalPaid: "Total Pagado",
 
     // Data Manager
     importExport: "Importar/Exportar",
     exportData: "Exportar Datos",
     importData: "Importar Datos",
-    exportSuccess: "Datos exportados exitosamente",
-    importSuccess: "Datos importados exitosamente",
-    importError: "Error al importar datos. Por favor verifica el formato del archivo.",
+    exportSuccess: "Datos exportados con éxito",
+    importSuccess: "Datos importados con éxito",
+    importError: "Error al importar datos. Por favor, verifica el formato del archivo.",
 
     // Common
     noData: "No hay datos disponibles",
+
+    dashboard: "Panel de Control",
+    payments: "Pagos",
+    paymentHistory: "Historial de Pagos",
+    totalDebt: "Total de Deuda",
+    makePayment: "Realizar Pago",
+    paymentAmount: "Monto del Pago",
+    paymentDate: "Fecha del Pago",
+    pay: "Pagar",
+    restart: "Reiniciar Ciclo",
+    partialPayment: "Pago Parcial",
+    fullPayment: "Pago Completo",
+    balance: "Saldo",
+    paidOn: "Pagado el",
+    noPayments: "Aún no hay pagos",
+    restartConfirm: "Esto reiniciará todas las suscripciones para un nuevo ciclo. ¿Continuar?",
+    payNow: "Pagar Ahora",
+    partialPaymentInfo: "Paga una cantidad parcial o el saldo completo",
+    allPaid: "Todo pagado ✓",
+    payAll: "Pagar Todo",
   },
 }
-
-export type Language = keyof typeof translations
-export type TranslationKey = keyof typeof translations.en

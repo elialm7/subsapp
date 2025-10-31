@@ -2,12 +2,13 @@
 
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import type { Currency, Subscription, AppData } from "./types"
+import type { Currency, Subscription, Payment, AppData } from "./types"
 import type { Language } from "./translations"
 
 interface StoreState {
   currencies: Currency[]
   subscriptions: Subscription[]
+  payments: Payment[]
   selectedCurrency: string
   language: Language
   theme: "light" | "dark"
@@ -17,6 +18,9 @@ interface StoreState {
   addSubscription: (subscription: Subscription) => void
   updateSubscription: (id: string, subscription: Partial<Subscription>) => void
   deleteSubscription: (id: string) => void
+  addPayment: (payment: Payment) => void
+  deletePayment: (id: string) => void
+  getPaymentsBySubscription: (subscriptionId: string) => Payment[]
   setSelectedCurrency: (currencyId: string) => void
   setLanguage: (language: Language) => void
   setTheme: (theme: "light" | "dark") => void
@@ -41,6 +45,7 @@ export const useStore = create<StoreState>()(
     (set, get) => ({
       currencies: defaultCurrencies,
       subscriptions: [],
+      payments: [],
       selectedCurrency: "1",
       language: "en",
       theme: "dark",
@@ -70,6 +75,18 @@ export const useStore = create<StoreState>()(
           subscriptions: state.subscriptions.filter((s) => s.id !== id),
         })),
 
+      addPayment: (payment) => set((state) => ({ payments: [...state.payments, payment] })),
+
+      deletePayment: (id) =>
+        set((state) => ({
+          payments: state.payments.filter((p) => p.id !== id),
+        })),
+
+      getPaymentsBySubscription: (subscriptionId) => {
+        const payments = get().payments
+        return payments.filter((p) => p.subscriptionId === subscriptionId)
+      },
+
       setSelectedCurrency: (currencyId) => set({ selectedCurrency: currencyId }),
 
       setLanguage: (language) => set({ language }),
@@ -80,11 +97,13 @@ export const useStore = create<StoreState>()(
         set({
           currencies: data.currencies.length > 0 ? data.currencies : defaultCurrencies,
           subscriptions: data.subscriptions,
+          payments: data.payments || [],
         }),
 
       exportData: () => ({
         currencies: get().currencies,
         subscriptions: get().subscriptions,
+        payments: get().payments,
       }),
     }),
     {

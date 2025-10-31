@@ -8,7 +8,9 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "SubsApp"
+  title: "Gestor de Suscripciones",
+  description: "Administra tus suscripciones y gastos mensuales",
+  generator: "v0.app",
 }
 
 export default function RootLayout({

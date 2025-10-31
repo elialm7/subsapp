@@ -1,18 +1,24 @@
 "use client"
 
+import { useState } from "react"
 import { CurrencyManager } from "@/components/currency-manager"
 import { SubscriptionManager } from "@/components/subscription-manager"
 import { SubscriptionSummary } from "@/components/subscription-summary"
 import { DataManager } from "@/components/data-manager"
 import { SettingsMenu } from "@/components/settings-menu"
+import { PaymentPage } from "@/components/payment-page"
+import { PaymentHistoryPage } from "@/components/payment-history-page"
 import { Toaster } from "@/components/ui/toaster"
 import { useStore } from "@/lib/store"
 import { translations } from "@/lib/translations"
 import { useEffect } from "react"
 
+type Tab = "dashboard" | "payments" | "history"
+
 export default function Home() {
   const { language, theme } = useStore()
   const t = translations[language]
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard")
 
   useEffect(() => {
     if (theme === "dark") {
@@ -38,19 +44,63 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="mb-6">
-          <SubscriptionSummary />
+        <div className="mb-6 flex gap-2 border-b border-border">
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+              activeTab === "dashboard"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t.dashboard}
+          </button>
+          <button
+            onClick={() => setActiveTab("payments")}
+            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+              activeTab === "payments"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t.payments}
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+              activeTab === "history"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t.paymentHistory}
+          </button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-1">
-            <CurrencyManager />
-          </div>
+        {/* Dashboard Tab */}
+        {activeTab === "dashboard" && (
+          <div>
+            <div className="mb-6">
+              <SubscriptionSummary />
+            </div>
 
-          <div className="lg:col-span-2">
-            <SubscriptionManager />
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-1">
+                <CurrencyManager />
+              </div>
+
+              <div className="lg:col-span-2">
+                <SubscriptionManager />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Payments Tab */}
+        {activeTab === "payments" && <PaymentPage />}
+
+        {/* History Tab */}
+        {activeTab === "history" && <PaymentHistoryPage />}
       </div>
       <Toaster />
     </main>
